@@ -2,7 +2,7 @@
 
 Repository ini mempelajari proses pengimplementasian basic dari Framework PHP yakni CodeIgniter.
 Sumber belajar : https://www.youtube.com/playlist?list=PLFIM0718LjIUkkIq1Ub6B5dYNb6IlMvtc
-Materi :
+## Materi :
 
 - Melakukan CRUD
 - Mengenal Pemodelan
