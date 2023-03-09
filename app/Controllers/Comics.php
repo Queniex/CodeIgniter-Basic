@@ -68,19 +68,37 @@ class Comics extends BaseController
                     'required' => '{field} komik harus diisi.',
                     'is_unique' => '{field} komik sudah terdaftar.'
                 ]
+            ],
+            'sampul' => [
+                'rules' => 'uploaded[sampul]|max_size[sampul, 1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
+                'errors' => [
+                    'uploaded' => '{field} komik harus diisi.',
+                    'max_size' => 'Ukuran {field} terlalu besar.',
+                    'is_image' => 'File bukanlah gambar, upload kembali.',
+                    'mime_in' => 'Hanya upload file bertipe jpg, jpeg, atau png'
+                ]
             ]
             // 'judul' => 'required|is_unique[komik.judul]'
         ])) {
 
-            $validation = \Config\Services::validation();
+            // //$validation = \Config\Services::validation();
             // dd($validation);
             // $data['title'] = 'Form Tambah';
             // $data['validation'] = $validation;
-            return redirect()->back()->withInput()->with("failed", $validation); 
+            return redirect()->back()->withInput(); 
 
             // return redirect()->to('/comics/create'); 
             // return view('comics/create', $data);
         }
+
+        // Proses memindahkan gambar
+        // 1. Ambil gambar :
+        $fileSampul = $this->request->getFile('sampul');
+        // 2. Pindahin file ke folder img :
+        $fileSampul->move('img');
+        // 3. Ambil nama file :
+        $namaSampul = $fileSampul->getName();
+
 
         $slug = url_title($this->request->getVar('judul'), '-', true);
         $this->komikModel->save([
@@ -88,7 +106,7 @@ class Comics extends BaseController
             'slug' => $slug,
             'penulis' => $this->request->getVar('penulis'),
             'penerbit' => $this->request->getVar('penerbit'),
-            'sampul' => $this->request->getVar('sampul')
+            'sampul' => $namaSampul
         ]);
         
         session()->setFlashdata('pesan', 'Data berhasil ditambahkan');

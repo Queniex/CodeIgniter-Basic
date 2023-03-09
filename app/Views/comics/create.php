@@ -6,7 +6,7 @@
             <div class="col-6">
                 <h1>Tambah Komik</h1>
                 <hr>
-                <form action="/comics/save" method="POST">
+                <form action="/comics/save" method="POST" enctype="multipart/form-data">
                     <?= csrf_field(); ?>
                     <div class="row mb-3">
                         <label for="judul" class="col-sm-2 col-form-label">Judul</label>
@@ -32,7 +32,12 @@
                     <div class="row mb-3">
                         <label for="sampul" class="col-sm-2 col-form-label">Sampul</label>
                         <div class="col-sm-10">
-                        <input type="text" class="form-control" id="sampul" name="sampul" value="<?= old('sampul'); ?>">
+                            <div class="custom-file">
+                                <input class="form-control <?= (validation_show_error('sampul')) ? 'is-invalid' : ''; ?>" type="file" id="sampul" name="sampul">
+                                <div id="validationServerUsernameFeedback" class="invalid-feedback">
+                                <?= validation_show_error('sampul'); ?>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-success">Tambah Data</button>
