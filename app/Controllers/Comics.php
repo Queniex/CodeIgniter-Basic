@@ -70,9 +70,8 @@ class Comics extends BaseController
                 ]
             ],
             'sampul' => [
-                'rules' => 'uploaded[sampul]|max_size[sampul, 1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
+                'rules' => 'max_size[sampul, 1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
                 'errors' => [
-                    'uploaded' => '{field} komik harus diisi.',
                     'max_size' => 'Ukuran {field} terlalu besar.',
                     'is_image' => 'File bukanlah gambar, upload kembali.',
                     'mime_in' => 'Hanya upload file bertipe jpg, jpeg, atau png'
@@ -94,11 +93,22 @@ class Comics extends BaseController
         // Proses memindahkan gambar
         // 1. Ambil gambar :
         $fileSampul = $this->request->getFile('sampul');
-        // 2. Pindahin file ke folder img :
-        $fileSampul->move('img');
-        // 3. Ambil nama file :
-        $namaSampul = $fileSampul->getName();
 
+        // Pengecekan apakah user memasukkan file sampul :
+        if($fileSampul->getError() == 4) {
+            $namaSampul = 'default.jpg';
+        } else {
+            // 1.1 generate nama random :
+            // $namaSampul = $fileSampul->getRandomName();
+    
+            // 2. Pindahin file ke folder img :
+            $fileSampul->move('img');
+            // 2.1 Memindahkan nama yang sudah d random :
+            //$fileSampul->move('img', $namaSampul);
+    
+            // 3. Ambil nama file :
+            $namaSampul = $fileSampul->getName();
+        }
 
         $slug = url_title($this->request->getVar('judul'), '-', true);
         $this->komikModel->save([
@@ -117,9 +127,15 @@ class Comics extends BaseController
 
     public function delete($id)
     {
+        // 1. Mencari file gambar berdasarkan id :
+        $komik = $this->komikModel->find($id);
+        // 2. Cek gambar bukan default.jpg :
+        if ($komik['sampul'] != 'default.jpg') {
+          // 3. Hapus gambar dari file img :
+          unlink('img/' . $komik['sampul']);   
+        }
+
         $this->komikModel->delete($id);
-
-
         session()->setFlashdata('pesan', 'Data berhasil terhapus');
         session()->setFlashdata('warna', 'danger');
 
@@ -156,13 +172,36 @@ class Comics extends BaseController
                     'required' => '{field} komik harus diisi.',
                     'is_unique' => '{field} komik sudah terdaftar.'
                 ]
+            ],
+            'sampul' => [
+                'rules' => 'max_size[sampul, 1024]|is_image[sampul]|mime_in[sampul,image/jpg,image/jpeg,image/png]',
+                'errors' => [
+                    'max_size' => 'Ukuran {field} terlalu besar.',
+                    'is_image' => 'File bukanlah gambar, upload kembali.',
+                    'mime_in' => 'Hanya upload file bertipe jpg, jpeg, atau png'
+                ]
             ]
 
         ])) {
 
-            $validation = \Config\Services::validation();
-            return redirect()->to('/comics/edit/' . $this->request->getVar('slug'))->withInput()->with("failed", $validation); 
+            // $validation = \Config\Services::validation();
+            return redirect()->to('/comics/edit/' . $this->request->getVar('slug'))->withInput(); 
         }
+
+        $fileSampul = $this->request->getFile('sampul');
+
+        // 1. Cek apakah masih menggunakan gambar lama :
+        if ( $fileSampul->getError() == 4 ){
+            // 2. Mengambil nilai sampul lama :
+            $namaSampul = $this->request->getVar("oldSampul");
+        } else [
+            // 3. Generate nama file random :
+            $namaSampul = $fileSampul->getRandomName();
+            // 4. Pindahkan ke file img :
+            $fileSampul->move('img', $namaSampul);
+            // 5. Hapus file lama : 
+            unlink('img/' . $this->request->getVar("oldSampul"));
+        ]
 
         $slug = url_title($this->request->getVar('judul'), '-', true);
         $this->komikModel->save([
@@ -171,7 +210,7 @@ class Comics extends BaseController
             'slug' => $slug,
             'penulis' => $this->request->getVar('penulis'),
             'penerbit' => $this->request->getVar('penerbit'),
-            'sampul' => $this->request->getVar('sampul')
+            'sampul' => $namaSampul
         ]);
         
         session()->setFlashdata('pesan', 'Data berhasil diubah');
