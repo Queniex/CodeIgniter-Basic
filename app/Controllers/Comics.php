@@ -194,14 +194,14 @@ class Comics extends BaseController
         if ( $fileSampul->getError() == 4 ){
             // 2. Mengambil nilai sampul lama :
             $namaSampul = $this->request->getVar("oldSampul");
-        } else [
+        } else {
             // 3. Generate nama file random :
             $namaSampul = $fileSampul->getRandomName();
             // 4. Pindahkan ke file img :
             $fileSampul->move('img', $namaSampul);
             // 5. Hapus file lama : 
             unlink('img/' . $this->request->getVar("oldSampul"));
-        ]
+        }
 
         $slug = url_title($this->request->getVar('judul'), '-', true);
         $this->komikModel->save([
