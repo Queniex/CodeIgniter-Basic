@@ -3,8 +3,19 @@
 <?= $this->section('content'); ?>
     <div class="container mt-4">
         <div class="row">
-            <div class="col">
+            <div class="col-6">
                 <h1>Daftar Mahasiswa</h1>
+                <form action="" method="POST">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="Enter Keyword..." name="keyword">
+                        <button class="btn btn-outline-secondary" type="submit" name="enter" id="button-addon2">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col">
                 <!-- <a href="/comics/create" class="btn btn-primary mb-3"> [+] Tambah Mahasiswa</a> -->
                 <?php if(session()->getFlashdata('pesan')) : ?>
                     <div class="alert alert-<?= session()->getFlashdata('warna'); ?>" role="alert">

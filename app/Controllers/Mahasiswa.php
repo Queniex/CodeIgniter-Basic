@@ -16,9 +16,20 @@ class Mahasiswa extends BaseController
 
         $currentPage = $this->request->getvar('page_mahasiswa') ? $this->request->getVar('page_mahasiswa') : 1;
 
+
+        // Ambil Data :
+        // dd($this->request->getVar('keyword'));
+        $keyword = $this->request->getVar('keyword');
+        if($keyword) {
+            $mahasiswa = $this->mahasiswaModel->search($keyword);
+        } else {
+            $mahasiswa = $this->mahasiswaModel;
+        }
+
+
         $data = [
             'title' => 'Comic Page',
-            'mahasiswa' => $this->mahasiswaModel->paginate(3, 'mahasiswa'),
+            'mahasiswa' => $mahasiswa->paginate(3, 'mahasiswa'),
             'pager' => $this->mahasiswaModel->pager,
             'currentPage' => $currentPage
         ];
